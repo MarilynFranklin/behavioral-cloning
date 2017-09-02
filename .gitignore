@@ -6,3 +6,6 @@ data.zip
 .terraform
 *.tfvars
 terraform.tfstate*
+
+# Yarn files
+yarn-error.log
