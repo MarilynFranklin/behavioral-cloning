@@ -14,7 +14,7 @@
     "unzip": "yarn ssh 'unzip data.zip'",
     "train": "yarn ssh 'source /home/carnd/anaconda3/bin/activate carnd-term1 && python model.py'",
     "upload-model": "scp model.py carnd@`terraform output public_ip`:~/model.py",
-    "download-model": "scp carnd@`terraform output public_ip`:~/{model.py,model.h5} ./",
-    "download-loss": "scp carnd@`terraform output public_ip`:~/loss_plot.png ./"
+    "download-model": "scp carnd@`terraform output public_ip`:~/model.py ./",
+    "download": "scp carnd@`terraform output public_ip`:~/{model.py,model.h5,loss_plot.png} ./"
   }
 }
