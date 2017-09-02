@@ -1,3 +1,4 @@
 data/
 data.zip
 .terraform
+terraform/terraform.tfvars
