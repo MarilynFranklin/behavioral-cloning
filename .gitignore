@@ -1,5 +1,8 @@
+# Data files
 data/
 data.zip
+
+# Terrafor files
 .terraform
-terraform/terraform.tfvars
+*.tfvars
 terraform.tfstate*
