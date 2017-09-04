@@ -31,8 +31,16 @@ for row in rows:
     images.extend(img_center, img_left, img_right)
     measurements.extend(steering_center, steering_left, steering_right)
 
-X_train = np.array(images)
-y_train = np.array(measurements)
+augmented_images, augmented_measurements = [], []
+for image,measurement in zip(images, measurements):
+    image_flipped = np.fliplr(image)
+    measurement_flipped = -measurement
+
+    augmented_images.extend(image, image_flipped)
+    augmented_measurements.extend(measurement, measurement_flipped)
+
+X_train = np.array(augmented_images)
+y_train = np.array(augmented_measurements)
 
 from keras.models import Sequential
 from keras.layers import Flatten, Dense
