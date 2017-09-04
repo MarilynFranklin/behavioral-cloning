@@ -10,7 +10,11 @@ rows = []
 
 def image_path(source_path)
     filename = source_path.split('/')[-1]
-    IMG_PATH + filename
+    return IMG_PATH + filename
+
+def process_image(source_path)
+    image = cv2.imread(image_path(source_path))
+    return cv2.cvtColor(image,cv2.COLOR_BGR2RGB)
 
 images = []
 measurements = []
@@ -24,9 +28,9 @@ for row in rows:
     steering_left   = steering_center + STEERING_CORRECTION
     steering_right  = steering_center - STEERING_CORRECTION
 
-    img_center = cv2.imread(image_path(row[0]))
-    img_left   = cv2.imread(image_path(row[1]))
-    img_right  = cv2.imread(image_path(row[2]))
+    img_center = process_image(row[0])
+    img_left   = process_image(row[1])
+    img_right  = process_image(row[2])
 
     images.extend(img_center, img_left, img_right)
     measurements.extend(steering_center, steering_left, steering_right)
