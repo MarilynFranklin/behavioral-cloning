@@ -4,23 +4,32 @@ import numpy as np
 
 MODEL_FILE = 'model.h5'
 LOSS_PLOT_FILE = 'loss_plot.png'
-lines = []
+STEERING_CORRECTION = 0.2
+IMG_PATH = 'data/IMG/'
+rows = []
 
-with open('data/driving_log.csv') as csvfile:
-    reader = csv.reader(csvfile)
-    for line in reader:
-        lines.append(line)
+def image_path(source_path)
+    filename = source_path.split('/')[-1]
+    IMG_PATH + filename
 
 images = []
 measurements = []
-for line in lines[1:]:
-    source_path = line[0]
-    filename = source_path.split('/')[-1]
-    current_path = 'data/IMG/' + filename
-    image = cv2.imread(current_path)
-    images.append(image)
-    measurement = float(line[3])
-    measurements.append(measurement)
+
+with open('data/driving_log.csv') as csvfile:
+    reader = csv.reader(csvfile)
+    rows   = reader[1:] # Skip header row
+
+for row in rows:
+    steering_center = float(row[3])
+    steering_left   = steering_center + STEERING_CORRECTION
+    steering_right  = steering_center - STEERING_CORRECTION
+
+    img_center = cv2.imread(image_path(row[0]))
+    img_left   = cv2.imread(image_path(row[1]))
+    img_right  = cv2.imread(image_path(row[2]))
+
+    images.extend(img_center, img_left, img_right)
+    measurements.extend(steering_center, steering_left, steering_right)
 
 X_train = np.array(images)
 y_train = np.array(measurements)
