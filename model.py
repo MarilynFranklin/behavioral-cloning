@@ -1,12 +1,15 @@
 import csv
 import cv2
 import numpy as np
+import sklearn
 
 MODEL_FILE = 'model.h5'
 LOSS_PLOT_FILE = 'loss_plot.png'
 STEERING_CORRECTION = 0.2
 IMG_PATH = 'data/IMG/'
-rows = []
+EPOCHS = 5
+BATCH_SIZE = 32
+samples = []
 
 def image_path(source_path)
     filename = source_path.split('/')[-1]
@@ -16,35 +19,50 @@ def process_image(source_path)
     image = cv2.imread(image_path(source_path))
     return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-images = []
-measurements = []
-
 with open('data/driving_log.csv') as csvfile:
-    reader = csv.reader(csvfile)
-    rows   = reader[1:] # Skip header row
+    reader  = csv.reader(csvfile)
+    samples = reader[1:] # Skip header row
 
-for row in rows:
-    steering_center = float(row[3])
-    steering_left   = steering_center + STEERING_CORRECTION
-    steering_right  = steering_center - STEERING_CORRECTION
+from sklearn.model_selection import train_test_split
+train_samples, validation_samples = train_test_split(samples, test_size=0.2)
 
-    img_center = process_image(row[0])
-    img_left   = process_image(row[1])
-    img_right  = process_image(row[2])
+def generator(samples, batch_size=32):
+    num_samples = len(samples)
+    while 1: # Loop forever so the generator never terminates
+        shuffle(samples)
+        for offset in range(0, num_samples, batch_size):
+            batch_samples = samples[offset:offset+batch_size]
 
-    images.extend(img_center, img_left, img_right)
-    measurements.extend(steering_center, steering_left, steering_right)
+            images = []
+            measurements = []
+            for batch_sample in batch_samples:
+                steering_center = float(batch_sample[3])
+                steering_left   = steering_center + STEERING_CORRECTION
+                steering_right  = steering_center - STEERING_CORRECTION
 
-augmented_images, augmented_measurements = [], []
-for image,measurement in zip(images, measurements):
-    image_flipped = np.fliplr(image)
-    measurement_flipped = -measurement
+                img_center = process_image(batch_sample[0])
+                img_left   = process_image(batch_sample[1])
+                img_right  = process_image(batch_sample[2])
 
-    augmented_images.extend(image, image_flipped)
-    augmented_measurements.extend(measurement, measurement_flipped)
+                images.extend(img_center, img_left, img_right)
+                measurements.extend(steering_center, steering_left, steering_right)
 
-X_train = np.array(augmented_images)
-y_train = np.array(augmented_measurements)
+            augmented_images, augmented_measurements = [], []
+            for image,measurement in zip(images, measurements):
+                image_flipped = np.fliplr(image)
+                measurement_flipped = -measurement
+
+                augmented_images.extend(image, image_flipped)
+                augmented_measurements.extend(measurement, measurement_flipped)
+
+            X_train = np.array(augmented_images)
+            y_train = np.array(augmented_measurements)
+
+            yield sklearn.utils.shuffle(X_train, y_train)
+
+# compile and train the model using the generator function
+train_generator = generator(train_samples, batch_size=BATCH_SIZE)
+validation_generator = generator(validation_samples, batch_size=BATCH_SIZE)
 
 from keras.models import Sequential
 from keras.layers import Flatten, Dense, Cropping2D
@@ -58,7 +76,10 @@ model.add(Flatten())
 model.add(Dense(1))
 
 model.compile(loss='mse', optimizer='adam')
-history_object = model.fit(X_train, y_train, validation_split=0.2, shuffle=True)
+history_object = model.fit_generator(train_generator, samples_per_epoch= /
+                            len(train_samples), validation_data=validation_generator, /
+                            nb_val_samples=len(validation_samples),
+                            nb_epoch=EPOCHS)
 
 model.save(MODEL_FILE)
 
