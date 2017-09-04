@@ -43,11 +43,12 @@ X_train = np.array(augmented_images)
 y_train = np.array(augmented_measurements)
 
 from keras.models import Sequential
-from keras.layers import Flatten, Dense
+from keras.layers import Flatten, Dense, Cropping2D
 import matplotlib.pyplot as plt
 plt.switch_backend('agg')
 
 model = Sequential()
+model.add(Cropping2D(cropping=((70,25), (0,0)), input_shape=(3,160,320)))
 model.add(Flatten(input_shape=(160,320,3)))
 model.add(Dense(1))
 
