@@ -1,4 +1,5 @@
 import csv
+from PIL import Image
 import cv2
 import numpy as np
 import sklearn
@@ -17,7 +18,8 @@ def image_path(source_path):
     return IMG_PATH + filename
 
 def process_image(source_path):
-    return cv2.imread(image_path(source_path))
+    image = Image.open(image_path(source_path))
+    return np.asarray(image)
 
 with open('data/driving_log.csv') as csvfile:
     reader  = csv.reader(csvfile)
