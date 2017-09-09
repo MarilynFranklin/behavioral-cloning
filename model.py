@@ -19,7 +19,8 @@ def image_path(source_path):
 
 def process_image(source_path):
     image = Image.open(image_path(source_path))
-    return np.asarray(image)
+    image_array = np.asarray(image)[:,:,1]
+    return np.expand_dims(image_array, axis=2)
 
 with open('data/driving_log.csv') as csvfile:
     reader  = csv.reader(csvfile)
@@ -58,7 +59,7 @@ import matplotlib.pyplot as plt
 plt.switch_backend('agg')
 
 model = Sequential()
-model.add(Cropping2D(cropping=((70,25), (0,0)), input_shape=(160,320,3)))
+model.add(Cropping2D(cropping=((70,25), (0,0)), input_shape=(160,320,1)))
 model.add(Lambda(lambda x: (x / 255.0) - 0.5))
 model.add(Flatten())
 model.add(Dense(1))
