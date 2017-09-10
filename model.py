@@ -70,17 +70,36 @@ train_generator = generator(train_samples, batch_size=BATCH_SIZE)
 validation_generator = generator(validation_samples, batch_size=BATCH_SIZE)
 
 from keras.models import Sequential
-from keras.layers import Flatten, Dense, Cropping2D, Lambda
+from keras.layers import Dense, Dropout, Flatten, Lambda, ELU, Cropping2D
+from keras.layers.convolutional import Convolution2D
 import matplotlib.pyplot as plt
 plt.switch_backend('agg')
 
-model = Sequential()
-model.add(Cropping2D(cropping=((70,25), (0,0)), input_shape=(160,320,1)))
-model.add(Lambda(lambda x: (x / 127.5) - 1.))
-model.add(Flatten())
-model.add(Dense(1))
+def get_model():
+    ch, row, col = 1, 160, 320  # camera format
 
-model.compile(loss='mse', optimizer='adam')
+    model = Sequential()
+    model.add(Cropping2D(cropping=((70,25), (0,0)), input_shape=(160,320,1)))
+    model.add(Lambda(lambda x: (x / 127.5) - 1.))
+    model.add(Convolution2D(16, 8, 8, subsample=(4, 4), border_mode="same"))
+    model.add(ELU())
+    model.add(Convolution2D(32, 5, 5, subsample=(2, 2), border_mode="same"))
+    model.add(ELU())
+    model.add(Convolution2D(64, 5, 5, subsample=(2, 2), border_mode="same"))
+    model.add(Flatten())
+    model.add(Dropout(.2))
+    model.add(ELU())
+    model.add(Dense(512))
+    model.add(Dropout(.5))
+    model.add(ELU())
+    model.add(Dense(1))
+
+    model.compile(optimizer="adam", loss="mse")
+
+    return model
+
+model = get_model()
+
 history_object = model.fit_generator(train_generator,
                         samples_per_epoch=len(train_samples),
                         validation_data=validation_generator,
