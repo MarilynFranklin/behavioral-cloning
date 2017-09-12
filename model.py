@@ -11,6 +11,7 @@ STEERING_CORRECTION = 0.2
 IMG_PATH = 'data/IMG/'
 EPOCHS = 10
 BATCH_SIZE = 32
+KEEP_PROBABILITY = 0.5
 samples = []
 
 def image_path(source_path):
@@ -19,8 +20,7 @@ def image_path(source_path):
 
 def process_image(source_path):
     image = Image.open(image_path(source_path))
-    image_array = np.asarray(image)[:,:,1]
-    return np.expand_dims(image_array, axis=2)
+    return np.asarray(image)
 
 with open('data/driving_log.csv') as csvfile:
     reader  = csv.reader(csvfile)
@@ -70,16 +70,16 @@ train_generator = generator(train_samples, batch_size=BATCH_SIZE)
 validation_generator = generator(validation_samples, batch_size=BATCH_SIZE)
 
 from keras.models import Sequential
-from keras.layers import Dense, Dropout, Flatten, Lambda, ELU, Cropping2D
+from keras.layers import ELU, Flatten, Dense, Dropout, Lambda, Activation, MaxPooling2D, Cropping2D
 from keras.layers.convolutional import Convolution2D
 import matplotlib.pyplot as plt
 plt.switch_backend('agg')
 
 def get_model():
-    ch, row, col = 1, 160, 320  # camera format
+    row, col, depth = 160, 320, 3  # camera format
 
     model = Sequential()
-    model.add(Cropping2D(cropping=((70,25), (0,0)), input_shape=(160,320,1)))
+    model.add(Cropping2D(cropping=((70,25), (0,0)), input_shape=(row,col,depth)))
     model.add(Lambda(lambda x: (x / 127.5) - 1.))
     model.add(Convolution2D(16, 8, 8, subsample=(4, 4), border_mode="same"))
     model.add(ELU())
@@ -98,7 +98,41 @@ def get_model():
 
     return model
 
-model = get_model()
+def nvidia_model():
+    row, col, depth = 160, 320, 3  # camera format
+    model = Sequential()
+
+    model.add(Lambda(lambda x: x/255 - .5, input_shape=(row, col, depth), output_shape=(row, col, depth)))
+    # model.add(Cropping2D(cropping=((70,25), (0,0)), input_shape=(row,col,depth)))
+    # model.add(Lambda(lambda x: (x / 127.5) - 1.))
+
+    model.add(Convolution2D(24, 5, 5, subsample=(2, 2), border_mode='valid'))
+    model.add(Activation('relu'))
+    model.add(Convolution2D(36, 5, 5, subsample=(2, 2), border_mode='valid'))
+    model.add(Activation('relu'))
+    model.add(Convolution2D(48, 5, 5, subsample=(2, 2), border_mode='valid'))
+    model.add(Activation('relu'))
+    model.add(Convolution2D(64, 3, 3, subsample=(1, 1), border_mode='valid'))
+    model.add(Activation('relu'))
+    model.add(Convolution2D(64, 3, 3, subsample=(1, 1), border_mode='valid'))
+
+    model.add(Flatten())
+    model.add(Dropout(KEEP_PROBABILITY))
+    model.add(Activation('relu'))
+    model.add(Dense(100))
+    model.add(Activation('relu'))
+    model.add(Dense(50))
+    model.add(Activation('relu'))
+    model.add(Dense(10))
+    model.add(Activation('relu'))
+    model.add(Dense(1))
+
+    model.compile(loss='mse', optimizer='adam')
+
+    return model
+
+model = nvidia_model()
+model.summary()
 
 history_object = model.fit_generator(train_generator,
                         samples_per_epoch=len(train_samples),

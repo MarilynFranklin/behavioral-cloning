@@ -11,4 +11,4 @@ terraform.tfstate*
 yarn-error.log
 
 # Video files
-run*
+run*/
