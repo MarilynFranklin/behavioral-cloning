@@ -9,9 +9,8 @@ MODEL_FILE = 'model.h5'
 LOSS_PLOT_FILE = 'loss_plot.png'
 STEERING_CORRECTION = 0.2
 IMG_PATH = 'data/IMG/'
-EPOCHS = 10
-BATCH_SIZE = 32
-KEEP_PROBABILITY = 0.5
+EPOCHS = 20
+BATCH_SIZE = 64
 samples = []
 
 def image_path(source_path):
@@ -103,8 +102,7 @@ def nvidia_model():
     model = Sequential()
 
     model.add(Lambda(lambda x: x/255 - .5, input_shape=(row, col, depth), output_shape=(row, col, depth)))
-    # model.add(Cropping2D(cropping=((70,25), (0,0)), input_shape=(row,col,depth)))
-    # model.add(Lambda(lambda x: (x / 127.5) - 1.))
+    model.add(Cropping2D(cropping=((50,20), (0,0))))
 
     model.add(Convolution2D(24, 5, 5, subsample=(2, 2), border_mode='valid'))
     model.add(Activation('relu'))
@@ -117,9 +115,10 @@ def nvidia_model():
     model.add(Convolution2D(64, 3, 3, subsample=(1, 1), border_mode='valid'))
 
     model.add(Flatten())
-    model.add(Dropout(KEEP_PROBABILITY))
+    model.add(Dropout(.2))
     model.add(Activation('relu'))
     model.add(Dense(100))
+    model.add(Dropout(.5))
     model.add(Activation('relu'))
     model.add(Dense(50))
     model.add(Activation('relu'))
