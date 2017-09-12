@@ -56,8 +56,8 @@ def generator(samples, batch_size=32):
                 image_flipped = np.fliplr(image)
                 measurement_flipped = -measurement
 
-                augmented_images += [image, image_flipped]
-                augmented_measurements += [measurement, measurement_flipped]
+                augmented_images += [image_flipped]
+                augmented_measurements += [measurement_flipped]
 
             X_train = np.array(augmented_images)
             y_train = np.array(augmented_measurements)
@@ -69,7 +69,7 @@ train_generator = generator(train_samples, batch_size=BATCH_SIZE)
 validation_generator = generator(validation_samples, batch_size=BATCH_SIZE)
 
 from keras.models import Sequential
-from keras.layers import ELU, Flatten, Dense, Dropout, Lambda, Activation, MaxPooling2D, Cropping2D
+from keras.layers import Flatten, Dense, Dropout, Lambda, Activation, Cropping2D
 from keras.layers.convolutional import Convolution2D
 import matplotlib.pyplot as plt
 plt.switch_backend('agg')
@@ -79,7 +79,7 @@ def get_model():
     model = Sequential()
 
     model.add(Lambda(lambda x: x/255 - .5, input_shape=(row, col, depth), output_shape=(row, col, depth)))
-    # model.add(Cropping2D(cropping=((50,20), (0,0))))
+    model.add(Cropping2D(cropping=((70,20), (0,0))))
 
     model.add(Convolution2D(24, 5, 5, subsample=(2, 2), border_mode='valid'))
     model.add(Activation('relu'))
