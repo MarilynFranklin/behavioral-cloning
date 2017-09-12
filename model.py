@@ -76,33 +76,10 @@ plt.switch_backend('agg')
 
 def get_model():
     row, col, depth = 160, 320, 3  # camera format
-
-    model = Sequential()
-    model.add(Cropping2D(cropping=((70,25), (0,0)), input_shape=(row,col,depth)))
-    model.add(Lambda(lambda x: (x / 127.5) - 1.))
-    model.add(Convolution2D(16, 8, 8, subsample=(4, 4), border_mode="same"))
-    model.add(ELU())
-    model.add(Convolution2D(32, 5, 5, subsample=(2, 2), border_mode="same"))
-    model.add(ELU())
-    model.add(Convolution2D(64, 5, 5, subsample=(2, 2), border_mode="same"))
-    model.add(Flatten())
-    model.add(Dropout(.2))
-    model.add(ELU())
-    model.add(Dense(512))
-    model.add(Dropout(.5))
-    model.add(ELU())
-    model.add(Dense(1))
-
-    model.compile(optimizer="adam", loss="mse")
-
-    return model
-
-def nvidia_model():
-    row, col, depth = 160, 320, 3  # camera format
     model = Sequential()
 
     model.add(Lambda(lambda x: x/255 - .5, input_shape=(row, col, depth), output_shape=(row, col, depth)))
-    model.add(Cropping2D(cropping=((50,20), (0,0))))
+    # model.add(Cropping2D(cropping=((50,20), (0,0))))
 
     model.add(Convolution2D(24, 5, 5, subsample=(2, 2), border_mode='valid'))
     model.add(Activation('relu'))
@@ -130,7 +107,7 @@ def nvidia_model():
 
     return model
 
-model = nvidia_model()
+model = get_model()
 model.summary()
 
 history_object = model.fit_generator(train_generator,
