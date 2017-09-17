@@ -13,17 +13,6 @@ The goals / steps of this project are the following:
 * Test that the model successfully drives around track one without leaving the road
 * Summarize the results with a written report
 
-
-[//]: # (Image References)
-
-[image1]: ./examples/placeholder.png "Model Visualization"
-[image2]: ./examples/placeholder.png "Grayscaling"
-[image3]: ./examples/placeholder_small.png "Recovery Image"
-[image4]: ./examples/placeholder_small.png "Recovery Image"
-[image5]: ./examples/placeholder_small.png "Recovery Image"
-[image6]: ./examples/placeholder_small.png "Normal Image"
-[image7]: ./examples/placeholder_small.png "Flipped Image"
-
 ## Rubric Points
 ### Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/432/view) individually and describe how I addressed each point in my implementation.  
 
@@ -193,13 +182,13 @@ for batch_sample in batch_samples:
 ```
 
 ###### Left Image
-<img src="example_images/image_left.jpg?raw=true" width="50">
+<img src="image_examples/image_left.jpg?raw=true">
 
 ###### Center Image
-<img src="example_images/image_center.jpg?raw=true" width="50">
+<img src="image_examples/image_center.jpg?raw=true">
 
 ###### Right Image
-<img src="example_images/image_right.jpg?raw=true" width="50">
+<img src="image_examples/image_right.jpg?raw=true">
 
 After the collection process, I had 8036 data points.
 
