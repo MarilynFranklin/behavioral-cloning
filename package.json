@@ -12,9 +12,10 @@
     "tf-destroy": "terraform destroy terraform/",
     "ssh": "ssh carnd@`terraform output public_ip`",
     "unzip": "yarn ssh 'unzip data.zip'",
-    "train": "yarn ssh 'source /home/carnd/anaconda3/bin/activate carnd-term1 && python model.py'",
+    "upload-data": "scp data.zip carnd@`terraform output public_ip`:~/data.zip",
     "upload-model": "scp model.py carnd@`terraform output public_ip`:~/model.py",
     "download-model": "scp carnd@`terraform output public_ip`:~/model.py ./",
-    "download": "scp carnd@`terraform output public_ip`:~/{model.py,model.h5,loss_plot.png} ./"
+    "download": "scp carnd@`terraform output public_ip`:~/{model.py,model.h5,loss_plot.png} ./",
+    "download-images": "scp carnd@`terraform output public_ip`:~/{image_right.jpg,image_left.jpg,image_center.jpg,image_flipped.jpg} ./",
   }
 }
